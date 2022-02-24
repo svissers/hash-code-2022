@@ -31,19 +31,28 @@ class Project:
         pass
 
 
-def solve(persons, projects, days):
-    current_day = 0
-
+def solve(persons, projects):
+    solved_projects = []
     while len(projects) != 0:
 
         for project in projects:
             # try to start as many projects with current devs
+            # add it to the solved_projects list
             pass
 
         # game tick
 
         # score berekenen --> check if project klaar
         # if klaar, delete from lijst
+
+    with open("solution.txt", "w") as f:
+        f.write("{}\n".format(str(len(solved_projects))))
+        for project in solved_projects:
+            f.write("{}\n".format(project.name))
+
+            names = [person.name for person in project.persons]
+            f.write(" ".join(names))
+            f.write("\n")
 
 
 def main():
@@ -80,9 +89,8 @@ def main():
             project.add_skill(skill)
         line += 1
         project_list.append(project)
-        nr_of_days = max(nr_of_days, int(days))
 
-    solve(person_list, project_list, nr_of_days)
+    solve(person_list, project_list)
 
 if __name__ == '__main__':
     main()
