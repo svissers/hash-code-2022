@@ -78,9 +78,10 @@ class Project:
     def can_start(self, persons):
         for skill in self.requirements:
             for person in persons:
-                if person.has_skill(skill, self.persons):
-                    person.set_project(self, skill)
-                    self.persons.append(person)
+                if not person.busy():
+                    if person.has_skill(skill, self.persons):
+                        person.set_project(self, skill)
+                        self.persons.append(person)
 
         if len(self.persons) == len(self.requirements):
             return True
