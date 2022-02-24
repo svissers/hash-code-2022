@@ -50,6 +50,8 @@ class Person:
 
     def release_project(self):
         self.current_project = None
+        self.gains_xp = False
+        self.current_skill = None
 
     def finish_project(self):
         if self.gains_xp:
@@ -100,18 +102,25 @@ class Project:
 
     def can_start(self, persons):
         for skill in self.requirements:
+            found = False
             eligible_persons = []
             for person in persons:
-                if not person.busy():
+                if not person.busy() and not found:
                     if person.has_skill(skill, self.persons):
+                        # person.set_project(self, skill)
+                        # self.persons.append(person)
+                        # found = True
+
                         eligible_persons.append(person)
+
             # eligible_persons = sorted(eligible_persons, key=lambda x: len(x.skills))
             random.shuffle(eligible_persons)
+            found = False
             for person in eligible_persons:
-                if not person.busy():
+                if not person.busy() and not found:
                     person.set_project(self, skill)
                     self.persons.append(person)
-                    break
+                    found = True
 
         if len(self.persons) == len(self.requirements):
             return True
@@ -174,14 +183,26 @@ class Game:
 
 
 def solve(persons, projects, filename):
+    all_skills = []
+    for person in persons:
+        all_skills.extend(person.skills)
+
+    names = set([s.name for s in all_skills])
+
+    for person in persons:
+        skillz = [skill.name for skill in person.skills]
+        for name in names:
+            if name not in skillz:
+                person.skills.append(Skill(name, 0))
+
     game = Game(projects, persons)
     best_before = max([p.best_before + p.duration for p in projects])
     while len(game.projects) != 0:
         game.tick()
-        if game.day > best_before:
+        if game.day > best_before or game.day > 1000:
             break
 
-    game.write_output(filename + "_solution.txt")
+    game.write_output(filename + "_solution_shuffle.txt")
 
 
 def solve_file(filename):
@@ -230,6 +251,7 @@ def main():
     onlyfiles = sorted(onlyfiles)
     for file in onlyfiles:
         solve_file(file)
+        print(file)
 
 
 if __name__ == '__main__':
