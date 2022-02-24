@@ -3,6 +3,16 @@ class Skill:
         self.name = name
         self.level = int(level)
 
+    def __eq__(self, other):
+        return self.name == other.name
+
+    def is_good_enough(self, other, persons):
+        if self.name == other.name:
+            if self.level >= other.level:
+                return True
+        # TODO Check mentor
+        return False
+
 
 class Person:
     def __init__(self, name):
@@ -17,7 +27,7 @@ class Person:
     def set_project(self, project, project_skill):
         self.current_project = project
         for skill in self.skills:
-            if skill.name == project_skill.name:
+            if skill == project_skill:
                 self.current_skill = skill
 
     def release_project(self):
@@ -26,6 +36,7 @@ class Person:
     def finish_project(self):
         self.current_skill.level = self.current_skill.level + 1
         self.current_skill = None
+        self.current_project = None
 
     def busy(self):
         return self.current_project is not None
@@ -33,12 +44,9 @@ class Person:
     def has_skill(self, other_skill, persons):
         if not self.busy():
             for skill in self.skills:
-                if skill.name == other_skill.name and skill.level == other_skill.level:
+                if skill.is_good_enough(other_skill, persons):
                     return True
         return False
-
-    def finish_project(self):
-        pass
 
 
 class Project:
@@ -50,6 +58,9 @@ class Project:
         self.requirements = []
         self.start_date = None
         self.persons = []
+
+    def start(self, day):
+        self.start_date = day
 
     def add_skill(self, skill):
         self.requirements.append(skill)
@@ -98,21 +109,29 @@ class Project:
 
 
 class Game:
-    def __init__(self, projects):
+    def __init__(self, projects, persons):
         self.day = 0
         self.score = 0
         self.projects = projects
+        self.running_projects = []
         self.solved_projects = []
+        self.persons = persons
 
     def tick(self):
+        for project in self.projects[:]:
+            if project.can_start(self.persons):
+                project.start(self.day)
+                self.running_projects.append(project)
+                self.solved_projects.append(project)
+                self.projects.remove(project)
+
         self.day += 1
 
         # Iterate over running projects
-        for project in self.projects[:]:
-            if project.tick():
+        for project in self.running_projects[:]:
+            if project.tick(self.day):
                 self.score += project.get_score(self.day)
-                self.projects.remove(project)
-                self.solved_projects.append(project)
+                self.running_projects.remove(project)
 
     def write_output(self, file):
         with open(file, "w") as f:
@@ -127,7 +146,7 @@ class Game:
 
 def solve(persons, projects):
     solved_projects = []
-    game = Game(projects)
+    game = Game(projects, persons)
 
     while len(game.projects) != 0:
         game.tick()
