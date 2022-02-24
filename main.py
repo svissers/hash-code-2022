@@ -27,12 +27,26 @@ class Project:
     def add_skill(self, skill):
         self.requirements.append(skill)
 
-    def tick(self):
+    def tick(self, running_projects):
         pass
+
+class Game:
+
+    def __init__(self):
+        self.day = 0
+
+    def tick(self):
+        self.day = self.day + 1
+
+        # Iterate over running projects
+        #
 
 
 def solve(persons, projects):
     solved_projects = []
+    game = Game()
+    running_projects = []
+
     while len(projects) != 0:
 
         for project in projects:
@@ -41,6 +55,7 @@ def solve(persons, projects):
             pass
 
         # game tick
+        game.tick(running_projects)
 
         # score berekenen --> check if project klaar
         # if klaar, delete from lijst
@@ -92,6 +107,6 @@ def main():
 
     solve(person_list, project_list)
 
+
 if __name__ == '__main__':
     main()
-
