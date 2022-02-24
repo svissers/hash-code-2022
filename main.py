@@ -13,6 +13,9 @@ class Person:
     def add_skill(self, skill):
         self.skills.append(skill)
 
+    def finish_project(self):
+        pass
+
 
 class Project:
     def __init__(self, name, duration, score, best_before):
@@ -27,20 +30,42 @@ class Project:
     def add_skill(self, skill):
         self.requirements.append(skill)
 
-    def tick(self, running_projects):
-        pass
+    def get_score(self, day):
+        return 5
 
+
+    def tick(self, curr_day) -> bool:
+        assert self.start_date is not None
+
+        if self.duration <= curr_day - self.start_date:
+            # Update person skill set and free() person
+            for person in self.persons:
+                person.finish_project()
+
+            # remove persons en reset start date
+            self.persons = []
+            self.start_date = None
+
+            return True
+
+        return False
 
 class Game:
 
     def __init__(self):
         self.day = 0
+        self.score = 0
 
-    def tick(self):
+    def tick(self, running_projects):
         self.day = self.day + 1
 
         # Iterate over running projects
-        #
+        for project in running_projects[:]:
+            if project.tick():
+                score = score + project.get_score(day)
+                running_projects.remove(project)
+
+
 
 
 def solve(persons, projects, days):
