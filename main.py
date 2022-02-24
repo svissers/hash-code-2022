@@ -1,3 +1,8 @@
+import random
+from os import listdir
+from os.path import isfile, join
+
+
 class Skill:
     def __init__(self, name, level):
         self.name = name
@@ -10,7 +15,14 @@ class Skill:
         if self.name == other.name:
             if self.level >= other.level:
                 return True
-        # TODO Check mentor
+            # check for mentor
+            elif self.level == other.level - 1:
+                for person in persons:
+                    for skill in person.skills:
+                        if skill == other:
+                            if skill.level >= other.level:
+                                return True
+
         return False
 
     def __repr__(self):
@@ -23,6 +35,7 @@ class Person:
         self.skills = []
         self.current_project = None
         self.current_skill = None
+        self.gains_xp = False
 
     def add_skill(self, skill):
         self.skills.append(skill)
@@ -32,14 +45,18 @@ class Person:
         for skill in self.skills:
             if skill == project_skill:
                 self.current_skill = skill
+                if skill.level <= project_skill.level:
+                    self.gains_xp = True
 
     def release_project(self):
         self.current_project = None
 
     def finish_project(self):
-        self.current_skill.level = self.current_skill.level + 1
+        if self.gains_xp:
+            self.current_skill.level = self.current_skill.level + 1
         self.current_skill = None
         self.current_project = None
+        self.gains_xp = False
 
     def busy(self):
         return self.current_project is not None
@@ -83,11 +100,18 @@ class Project:
 
     def can_start(self, persons):
         for skill in self.requirements:
+            eligible_persons = []
             for person in persons:
                 if not person.busy():
                     if person.has_skill(skill, self.persons):
-                        person.set_project(self, skill)
-                        self.persons.append(person)
+                        eligible_persons.append(person)
+            # eligible_persons = sorted(eligible_persons, key=lambda x: len(x.skills))
+            random.shuffle(eligible_persons)
+            for person in eligible_persons:
+                if not person.busy():
+                    person.set_project(self, skill)
+                    self.persons.append(person)
+                    break
 
         if len(self.persons) == len(self.requirements):
             return True
@@ -149,21 +173,22 @@ class Game:
                 f.write("\n")
 
 
-def solve(persons, projects):
-    solved_projects = []
+def solve(persons, projects, filename):
     game = Game(projects, persons)
-
+    best_before = max([p.best_before + p.duration for p in projects])
     while len(game.projects) != 0:
         game.tick()
+        if game.day > best_before:
+            break
 
-    game.write_output("solution.txt")
+    game.write_output(filename + "_solution.txt")
 
 
-def main():
+def solve_file(filename):
     person_list = []
     project_list = []
 
-    infile = "input_data/a_an_example.in.txt"
+    infile = "input_data/"+filename
     with open(infile) as f:
         lines = f.readlines()
 
@@ -194,7 +219,17 @@ def main():
         line += 1
         project_list.append(project)
 
-    solve(person_list, project_list)
+    solve(person_list, project_list, filename)
+
+
+def main():
+    mypath = "input_data/"
+
+    onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath, f))]
+
+    onlyfiles = sorted(onlyfiles)
+    for file in onlyfiles:
+        solve_file(file)
 
 
 if __name__ == '__main__':
