@@ -80,7 +80,6 @@ class Project:
     def get_score(self, day):
         return 5
 
-
     def tick(self, curr_day) -> bool:
         assert self.start_date is not None
 
@@ -99,52 +98,41 @@ class Project:
 
 
 class Game:
-    def __init__(self):
+    def __init__(self, projects):
         self.day = 0
         self.score = 0
+        self.projects = projects
+        self.solved_projects = []
 
-    def tick(self, running_projects):
+    def tick(self):
         self.day += 1
 
         # Iterate over running projects
-        for project in running_projects[:]:
+        for project in self.projects[:]:
             if project.tick():
-                self.score = self.score + project.get_score(self.day)
-                running_projects.remove(project)
+                self.score += project.get_score(self.day)
+                self.projects.remove(project)
+                self.solved_projects.append(project)
+
+    def write_output(self, file):
+        with open(file, "w") as f:
+            f.write("{}\n".format(str(len(self.solved_projects))))
+            for project in self.solved_projects:
+                f.write("{}\n".format(project.name))
+
+                names = [person.name for person in project.persons]
+                f.write(" ".join(names))
+                f.write("\n")
 
 
 def solve(persons, projects):
     solved_projects = []
-    game = Game()
-    running_projects = []
-    tick = 0
+    game = Game(projects)
 
-    while len(projects) != 0:
+    while len(game.projects) != 0:
+        game.tick()
 
-        for project in projects:
-            # try to start as many projects with current devs
-            # add it to the solved_projects list
-            if project.can_start(persons):
-                project.start_date = tick
-                solved_projects.append(project)
-
-        # game tick
-
-        for project in projects[:]:
-            # tick == true ==> done
-            if project.tick(tick):
-                projects.remove(project)
-
-        tick += 1
-
-    with open("solution.txt", "w") as f:
-        f.write("{}\n".format(str(len(solved_projects))))
-        for project in solved_projects:
-            f.write("{}\n".format(project.name))
-
-            names = [person.name for person in project.persons]
-            f.write(" ".join(names))
-            f.write("\n")
+    game.write_output("solution.txt")
 
 
 def main():
