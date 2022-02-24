@@ -13,6 +13,9 @@ class Skill:
         # TODO Check mentor
         return False
 
+    def __repr__(self):
+        return "{} level {}".format(self.name, str(self.level))
+
 
 class Person:
     def __init__(self, name):
@@ -48,6 +51,9 @@ class Person:
                     return True
         return False
 
+    def __repr__(self):
+        return "person {}".format(self.name)
+
 
 class Project:
     def __init__(self, name, duration, score, best_before):
@@ -65,15 +71,15 @@ class Project:
     def add_skill(self, skill):
         self.requirements.append(skill)
 
-    def tick_stijn(self, day):
-        if self.start_date is not None:
-            self.duration -= 1
-            if self.duration == 0:
-                for person in self.persons:
-                    person.release_project()
-                return True
-            else:
-                return False
+    # def tick_stijn(self, day):
+    #     if self.start_date is not None:
+    #         self.duration -= 1
+    #         if self.duration == 0:
+    #             for person in self.persons:
+    #                 person.release_project()
+    #             return True
+    #         else:
+    #             return False
 
     def can_start(self, persons):
         for skill in self.requirements:
@@ -87,6 +93,7 @@ class Project:
             return True
         for person in self.persons:
             person.release_project()
+        self.persons = []
         return False
 
     def get_score(self, day):
@@ -99,14 +106,11 @@ class Project:
             # Update person skill set and free() person
             for person in self.persons:
                 person.finish_project()
-
-            # remove persons en reset start date
-            self.persons = []
-            self.start_date = None
-
             return True
-
         return False
+
+    def __repr__(self):
+        return "project {}".format(self.name)
 
 
 class Game:
