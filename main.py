@@ -1,13 +1,7 @@
-# This is a sample Python script.
-
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
-
-
 class Skill:
     def __init__(self, name, level):
         self.name = name
-        self.level = level
+        self.level = int(level)
 
 
 class Person:
@@ -23,17 +17,33 @@ class Person:
 class Project:
     def __init__(self, name, duration, score, best_before):
         self.name = name
-        self.duration = duration
-        self.best_before = best_before
-        self.score = score
+        self.duration = int(duration)
+        self.best_before = int(best_before)
+        self.score = int(score)
         self.requirements = []
+        self.start_date = None
+        self.persons = []
 
     def add_skill(self, skill):
         self.requirements.append(skill)
 
+    def tick(self):
+        pass
 
-def solve(persons, projects):
-    pass
+
+def solve(persons, projects, days):
+    current_day = 0
+
+    while len(projects) != 0:
+
+        for project in projects:
+            # try to start as many projects with current devs
+            pass
+
+        # game tick
+
+        # score berekenen --> check if project klaar
+        # if klaar, delete from lijst
 
 
 def main():
@@ -58,6 +68,8 @@ def main():
         line += 1
         person_list.append(contributor)
 
+    nr_of_days = 0
+
     for i in range(int(projects)):
         project_name, days, score, before, nr_roles = lines[line].split(" ")
         project = Project(project_name, days, score, before)
@@ -68,13 +80,9 @@ def main():
             project.add_skill(skill)
         line += 1
         project_list.append(project)
+        nr_of_days = max(nr_of_days, int(days))
 
-
-    print(contributors)
-
-    solve(person_list, project_list)
-
-
+    solve(person_list, project_list, nr_of_days)
 
 if __name__ == '__main__':
     main()
